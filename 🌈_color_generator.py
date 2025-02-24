@@ -181,7 +181,7 @@ with inspo_expander:
             """
         <style>
         [role=radiogroup]{
-            gap: 1.5rem; padding-top: 1rem;
+            gap: 1.3rem; padding-top: 1rem;
         }
         </style>
         """,
