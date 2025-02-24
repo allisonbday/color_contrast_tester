@@ -11,11 +11,8 @@ import pandas as pd
 from streamlit_extras.stylable_container import stylable_container
 
 # import from src
-path = os.path.dirname(__file__)
-# from src.ColorContrastGenerator import ColorContrastGenerator
-
-
-from ColorContrastGenerator import ColorContrastGenerator
+# path = os.path.dirname(__file__)
+from functions.ColorContrastGenerator import ColorContrastGenerator
 
 
 # PAGE SET UP -----------------------------------------------------------------
