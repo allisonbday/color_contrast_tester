@@ -163,43 +163,44 @@ st.markdown(
 
 # inspiration palette
 
-images = [gen_palette_img(color_palette["p"]) for color_palette in default_palettes]
-caps = [
-    # color_palette["cap"] + f" [🔗]({color_palette['url']})"
-    color_palette["cap"]
-    for color_palette in default_palettes
-]
+inspo_expander = st.expander("**Inspiration Palettes**", expanded=True)
+inspo_expander.markdown(hide_expander_border, unsafe_allow_html=True)
 
+with inspo_expander:
+    images = [gen_palette_img(color_palette["p"]) for color_palette in default_palettes]
+    caps = [
+        # color_palette["cap"] + f" [🔗]({color_palette['url']})"
+        color_palette["cap"]
+        for color_palette in default_palettes
+    ]
 
-col1, col2 = st.columns([0.2, 0.8])
+    col1, col2 = st.columns([0.2, 0.8])
 
-with col1:
-    st.markdown(
-        """
-    <style>
-    [role=radiogroup]{
-        gap: 1.5rem; padding-top: 1rem;
-    }
-    </style>
-    """,
-        unsafe_allow_html=True,
-    )
-    pick_img = st.radio(
-        "Inspo Palette",
-        [x for x in range(len(images))],
-        captions=caps,
-    )
+    with col1:
+        st.markdown(
+            """
+        <style>
+        [role=radiogroup]{
+            gap: 1.5rem; padding-top: 1rem;
+        }
+        </style>
+        """,
+            unsafe_allow_html=True,
+        )
+        pick_img = st.radio(
+            "Inspo Palette",
+            [x for x in range(len(images))],
+            captions=caps,
+        )
 
-color_palette_idx = pick_img
-color_palette = default_palettes[color_palette_idx]["p"]
+    color_palette_idx = pick_img
+    color_palette = default_palettes[color_palette_idx]["p"]
 
+    with col2:
+        st.write("---")
+        st.image(images)
 
-with col2:
-    st.write("---")
-    st.image(images)
-
-
-# ColorContrastGenerator
+    # ColorContrastGenerator
 
 
 with st.container(border=True):
@@ -208,6 +209,7 @@ with st.container(border=True):
 
     st.number_input(
         "Number of Colors",
+        min_value=2,
         max_value=10,
         value=len(color_palette),
         key="color_nums",
