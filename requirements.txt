@@ -1,7 +1,7 @@
-colour==0.1.5
-numpy==1.24.1
-pandas==2.2.3
-Pillow==9.4.0
-Pillow==11.1.0
-streamlit==1.42.2
-streamlit_extras==0.5.5
+colour
+numpy
+pandas
+Pillow
+Pillow
+streamlit
+streamlit_extras
