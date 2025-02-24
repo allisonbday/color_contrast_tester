@@ -319,7 +319,7 @@ for c in results:
 
             c1.markdown(
                 f"""
-                <span style="font-size: 20px; line-height: 3.2rem; text-align: center; font-weight: bold; text-transform: uppercase; text-align: center;line-height: 40px;"> {color1} {color_font(color1)} *&* {color2} {color_font(color2)}</span>
+                <span style="font-size: 19px; line-height: 3.2rem; text-align: center; font-weight: bold; text-transform: uppercase; text-align: center;line-height: 40px;"> {color1} {color_font(color1)} *&* {color2} {color_font(color2)}</span>
                 """,
                 unsafe_allow_html=True,
             )
