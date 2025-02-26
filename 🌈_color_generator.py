@@ -300,8 +300,8 @@ st.header("RESULTS")
 
 # color_palette = reorder_as_ombre(color_palette)
 
-st.image(gen_palette_img(color_palette))
-st.image(gen_palette_img(reorder_as_ombre(color_palette)))
+# st.image(gen_palette_img(color_palette))
+# st.image(gen_palette_img(reorder_as_ombre(color_palette)))
 
 
 # filters
