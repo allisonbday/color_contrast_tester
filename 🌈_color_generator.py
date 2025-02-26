@@ -352,8 +352,8 @@ box_expander = st.expander("**Box Check**", expanded=True)
 box_expander.markdown(hide_expander_border, unsafe_allow_html=True)
 
 if not results:
-    line_expander.write("No acceptible combinations found")
-    box_expander.write("No acceptible combinations found")
+    line_expander.write("No combinations found")
+    box_expander.write("No combinations found")
 
 for c in results:
 
