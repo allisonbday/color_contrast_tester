@@ -96,6 +96,11 @@ default_palettes = [
         "url": "https://www.pinterest.com/pin/37365871903237048/",
     },
     {
+        "p": ["#353227", "#897e46", "#edd9b8", "#b3a8a2", "#f09560", "#c46d52"],
+        "cap": "yosemite",
+        "url": "https://www.pinterest.com/pin/778982066831467763/",
+    },
+    {
         "p": [
             "#35201B",
             "#ab482d",
@@ -202,6 +207,17 @@ with inspo_expander:
 
     # ColorContrastGenerator
 
+list_input = st.text_input("List, separate with commas")
+
+if list_input:
+    color_palette = [
+        "#" + color
+        for color in list_input.replace(" ", "#").replace(",", "#").split("#")
+        if color
+    ]
+
+    st.code(color_palette)
+
 
 with st.container(border=True):
 
@@ -280,7 +296,7 @@ it = 0
 # ColorContrastGenerator.AccessibilityLevel
 
 
-line_expander = st.expander("**Line Check**", expanded=True)
+line_expander = st.expander("**Line Check**")
 line_expander.markdown(hide_expander_border, unsafe_allow_html=True)
 
 
