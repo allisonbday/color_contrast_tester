@@ -274,10 +274,12 @@ if color_input:
     if len(color_palette) < 2:
         color_palette += ["#000000", "#ffffff", "#FF0000"][: 2 - len(color_palette)]
 
-    st.code(color_palette)
+    if input_color_palette != color_palette:
+        st.write("your unique color palette:")
+        st.code(color_palette)
 
     if not_colors:
-        st.write("the following are not proper hex colors:")
+        st.write("the following are not proper hex codes:")
         st.code(not_colors)
 
 with st.container(border=True):
