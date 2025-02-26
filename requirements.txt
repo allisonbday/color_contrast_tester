@@ -5,3 +5,4 @@ Pillow
 Pillow
 streamlit
 streamlit_extras
+re

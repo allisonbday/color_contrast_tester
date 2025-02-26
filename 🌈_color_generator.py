@@ -4,6 +4,7 @@ import streamlit as st
 from PIL import Image
 from datetime import date, timedelta
 import itertools
+import re
 
 import numpy as np
 import pandas as pd
@@ -131,7 +132,30 @@ default_palettes = [
 # FUNCTIONS --------------------------------------------------------------------
 
 
+def drop_duplicates(palette):
+    """Remove duplicate colors from the palette."""
+    return list(dict.fromkeys(palette))
+
+
+def reorder_as_ombre(palette):
+    """Reorder the palette to create an ombre effect starting with the darkest color."""
+    # Convert hex colors to RGB
+    rgb_palette = [
+        tuple(int(color[i : i + 2], 16) for i in (1, 3, 5)) for color in palette
+    ]
+
+    # Sort colors by their brightness (sum of RGB values)
+    sorted_palette = sorted(rgb_palette, key=lambda rgb: sum(rgb))
+
+    # Convert RGB back to hex
+    hex_palette = ["#%02x%02x%02x" % rgb for rgb in sorted_palette]
+
+    return hex_palette
+
+
 def gen_palette_img(color_palette):
+
+    # color_palette = drop_duplicates(color_palette)
 
     max_width = 1000
 
@@ -207,17 +231,35 @@ with inspo_expander:
 
     # ColorContrastGenerator
 
-list_input = st.text_input("List, separate with commas")
 
-if list_input:
+color_input = st.text_input("Import List, separate with commas (max 10)")
+
+if color_input:
+
+    try:
+        color_palette = eval(color_input)
+        if not isinstance(color_palette, list):
+            raise ValueError
+    except:
+
+        # only accept letters, numbers and #,
+        color_input = re.sub(r"[^a-zA-Z0-9 #,]", "", color_input)
+
+        color_palette = [
+            "#" + color
+            for color in color_input.replace(" ", "#").replace(",", "#").split("#")
+            if color and color != "#"
+        ]
+
+    # only accept valid hex codes
     color_palette = [
-        "#" + color
-        for color in list_input.replace(" ", "#").replace(",", "#").split("#")
-        if color
-    ]
+        color for color in color_palette if re.match(r"^#[0-9A-Fa-f]{6}$", color)
+    ][:10]
+
+    if len(color_palette) < 2:
+        color_palette += ["#000000", "#ffffff", "#FF0000"][: 2 - len(color_palette)]
 
     st.code(color_palette)
-
 
 with st.container(border=True):
 
@@ -255,6 +297,12 @@ all_results = ColorContrastGenerator.all_palette_results(color_palette)
 results = all_results
 
 st.header("RESULTS")
+
+# color_palette = reorder_as_ombre(color_palette)
+
+st.image(gen_palette_img(color_palette))
+st.image(gen_palette_img(reorder_as_ombre(color_palette)))
+
 
 # filters
 
@@ -302,6 +350,10 @@ line_expander.markdown(hide_expander_border, unsafe_allow_html=True)
 
 box_expander = st.expander("**Box Check**", expanded=True)
 box_expander.markdown(hide_expander_border, unsafe_allow_html=True)
+
+if not results:
+    line_expander.write("No acceptible combinations found")
+    box_expander.write("No acceptible combinations found")
 
 for c in results:
 
@@ -432,6 +484,26 @@ for c in results:
 st.write("# COPY PALETTE")
 
 
+def reorder_as_ombre(palette):
+    # Convert hex colors to RGB
+    rgb_palette = [
+        tuple(int(color[i : i + 2], 16) for i in (1, 3, 5)) for color in palette
+    ]
+
+    # Sort colors by their brightness
+    sorted_palette = sorted(rgb_palette, key=lambda rgb: sum(rgb))
+
+    # Convert RGB back to hex
+    hex_palette = ["#%02x%02x%02x" % rgb for rgb in sorted_palette]
+
+    return hex_palette
+
+
+# color_palette = reorder_as_ombre(color_palette)
+
 st.image(gen_palette_img(color_palette))
+
+
+st.image(gen_palette_img(reorder_as_ombre(color_palette)))
 
 color_palette
