@@ -132,7 +132,7 @@ default_palettes = [
 # FUNCTIONS --------------------------------------------------------------------
 
 
-def drop_duplicates(palette):
+def list_unique(palette):
     """Remove duplicate colors from the palette."""
     return list(dict.fromkeys(palette))
 
@@ -155,7 +155,7 @@ def reorder_as_ombre(palette):
 
 def gen_palette_img(color_palette):
 
-    # color_palette = drop_duplicates(color_palette)
+    # color_palette = list_unique(color_palette)
 
     max_width = 1000
 
@@ -236,30 +236,49 @@ color_input = st.text_input("Import List, separate with commas (max 10)")
 
 if color_input:
 
-    try:
-        color_palette = eval(color_input)
-        if not isinstance(color_palette, list):
-            raise ValueError
-    except:
+    # try:
+    #     input_color_palette = eval(color_input)
+    #     if not isinstance(color_palette, list):
+    #         raise ValueError
+    # except:
 
-        # only accept letters, numbers and #,
-        color_input = re.sub(r"[^a-zA-Z0-9 #,]", "", color_input)
+    # only accept letters, numbers and #,
+    color_input = re.sub(r"[^a-zA-Z0-9 #,]", "", color_input)
 
-        color_palette = [
-            "#" + color
-            for color in color_input.replace(" ", "#").replace(",", "#").split("#")
-            if color and color != "#"
-        ]
+    input_color_palette = [
+        "#" + color
+        for color in color_input.replace(" ", "#")
+        .replace(",", "#")
+        .replace("'", "#")
+        .split("#")
+        if color and color != "#"
+    ]
 
     # only accept valid hex codes
-    color_palette = [
-        color for color in color_palette if re.match(r"^#[0-9A-Fa-f]{6}$", color)
-    ][:10]
+    color_palette = list_unique(
+        [
+            color
+            for color in input_color_palette
+            if re.match(r"^#[0-9A-Fa-f]{6}$", color)
+        ]
+    )[:10]
+
+    not_colors = list_unique(
+        [
+            color
+            for color in input_color_palette
+            if not re.match(r"^#[0-9A-Fa-f]{6}$", color)
+        ]
+    )
 
     if len(color_palette) < 2:
         color_palette += ["#000000", "#ffffff", "#FF0000"][: 2 - len(color_palette)]
 
     st.code(color_palette)
+
+    if not_colors:
+        st.write("the following are not proper hex colors:")
+        st.code(not_colors)
 
 with st.container(border=True):
 
@@ -324,6 +343,19 @@ if results_filter == "AAA (7)":
 
 if results_filter == "AA Large (3)":
     results = [x for x in all_results if x["contrast_ratio"] >= 3]
+
+
+# Get unique combinations of results
+unique_results = []
+seen_combinations = set()
+
+for result in results:
+    combo = tuple(sorted([result["color1"], result["color2"]]))
+    if combo not in seen_combinations and result["color1"] != result["color2"]:
+        seen_combinations.add(combo)
+        unique_results.append(result)
+
+results = unique_results
 
 
 def levels(contrast_ratio):
