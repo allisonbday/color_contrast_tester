@@ -210,7 +210,7 @@ st.markdown(
 
 # inspiration palette
 
-inspo_expander = st.expander("**Inspiration Palettes**", expanded=True)
+inspo_expander = st.expander("**Inspiration Palettes**", expanded=False)
 inspo_expander.markdown(hide_expander_border, unsafe_allow_html=True)
 
 with inspo_expander:
@@ -538,21 +538,65 @@ for c in results:
 custom_expander = st.expander("**Custom Check**", expanded=True)
 custom_expander.markdown(hide_expander_border, unsafe_allow_html=True)
 
+
+def invert_bgtx():
+    old_background = st.session_state["background_pill"]
+    old_text = st.session_state["text_pill"]
+
+    st.session_state["background_pill"] = old_text
+    st.session_state["text_pill"] = old_background
+
+
 with custom_expander:
 
-    c1, c2, c3 = st.columns([0.45, 0.1, 0.45])
+    c1, c2, c3 = st.columns([0.45, 0.1, 0.45], gap="large")
+
+    if "background_pill" not in st.session_state:
+        st.session_state["background_pill"] = 1
+
+    if "text_pill" not in st.session_state:
+        st.session_state["text_pill"] = 2
+
+    background_color_idx = color_palette.index(color1) + 1
+    text_color_idx = color_palette.index(color2) + 1
+
+    with c2:
+
+        c2.markdown(
+            """
+            <style>
+            div.stButton > button {
+            display: block;
+            margin: auto;
+            position: relative;
+            top: 50%;
+            transform: translateY(150%);
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        invert_button = c2.button(
+            "",
+            icon=":material/invert_colors:",
+            on_click=invert_bgtx,
+            use_container_width=True,
+            type="tertiary",
+            help="Invert colors",
+        )
 
     background_color_idx = c1.pills(
         "Background Color",
         key="background_pill",
         options=range(1, len(color_palette) + 1),
-        default=color_palette.index(color2) + 1,
+        default=background_color_idx,
     )
     text_color_idx = c3.pills(
         "Text Color",
         key="text_pill",
         options=range(1, len(color_palette) + 1),
-        default=color_palette.index(color1) + 1,
+        default=text_color_idx,
     )
 
     # custom_text = st.text_area(
@@ -639,13 +683,15 @@ with custom_expander:
                 <span class="highlight" >
                 _____________________________________________________________________
                 
-                <h1>Example Header</h1>
+                <h1>Example</h1>
 
                 {custom_text}
                 </span>
                 """,
             unsafe_allow_html=True,
         )
+
+
 # <span style="text-align: left;"></span>
 
 st.write("# COPY PALETTE")
