@@ -400,7 +400,7 @@ line_expander = st.expander("**Line Check**")
 line_expander.markdown(hide_expander_border, unsafe_allow_html=True)
 
 
-box_expander = st.expander("**Box Check**", expanded=True)
+box_expander = st.expander("**Box Check**", expanded=False)
 box_expander.markdown(hide_expander_border, unsafe_allow_html=True)
 
 if not results:
