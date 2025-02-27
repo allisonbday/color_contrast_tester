@@ -5,6 +5,7 @@ from PIL import Image
 from datetime import date, timedelta
 import itertools
 import re
+import colorsys
 
 import numpy as np
 import pandas as pd
@@ -137,20 +138,37 @@ def list_unique(palette):
     return list(dict.fromkeys(palette))
 
 
+def convert_rgb_palette(palette):
+    return [tuple(int(color[i : i + 2], 16) for i in (1, 3, 5)) for color in palette]
+
+
+# ['#f8ff00', '#ff8300', '#ff0096', '#00d5ff', '#7cff00', '#e500ff', '#00ffd4', '#000000', '#0022ff', '#ff3b00']
 def reorder_as_ombre(palette):
-    """Reorder the palette to create an ombre effect starting with the darkest color."""
-    # Convert hex colors to RGB
-    rgb_palette = [
-        tuple(int(color[i : i + 2], 16) for i in (1, 3, 5)) for color in palette
+    """Reorder a list of hex colors to create an ombre effect."""
+
+    # Convert hex to RGB
+    rgb_palette = convert_rgb_palette(palette)
+
+    # Convert RGB to HLS
+    hls_palette = [
+        colorsys.rgb_to_hls(*[x / 255.0 for x in color]) for color in rgb_palette
     ]
 
-    # Sort colors by their brightness (sum of RGB values)
-    sorted_palette = sorted(rgb_palette, key=lambda rgb: sum(rgb))
+    # Sort by lightness (HLS[1]) and then by hue (HLS[0])
+    hls_palette.sort(key=lambda x: (x[1], x[0]))
+
+    # Convert back to RGB
+    sorted_rgb_palette = [colorsys.hls_to_rgb(*color) for color in hls_palette]
 
     # Convert RGB back to hex
-    hex_palette = ["#%02x%02x%02x" % rgb for rgb in sorted_palette]
+    sorted_palette = [
+        "#{:02x}{:02x}{:02x}".format(
+            int(color[0] * 255), int(color[1] * 255), int(color[2] * 255)
+        )
+        for color in sorted_rgb_palette
+    ]
 
-    return hex_palette
+    return sorted_palette
 
 
 def gen_palette_img(color_palette):
@@ -272,7 +290,7 @@ if color_input:
     )
 
     if len(color_palette) < 2:
-        color_palette += ["#000000", "#ffffff", "#FF0000"][: 2 - len(color_palette)]
+        color_palette += ["#000000", "#EAEAEA", "#FF0000"][: 2 - len(color_palette)]
 
     if input_color_palette != color_palette:
         st.write("your unique color palette:")
@@ -515,29 +533,131 @@ for c in results:
         it += 1
 
 
+custom_expander = st.expander("**Custom Check**", expanded=True)
+custom_expander.markdown(hide_expander_border, unsafe_allow_html=True)
+
+with custom_expander:
+
+    c1, c2, c3 = st.columns([0.45, 0.1, 0.45])
+
+    background_color_idx = c1.pills(
+        "Background Color",
+        key="background_pill",
+        options=range(1, len(color_palette) + 1),
+        default=color_palette.index(color2) + 1,
+    )
+    text_color_idx = c3.pills(
+        "Text Color",
+        key="text_pill",
+        options=range(1, len(color_palette) + 1),
+        default=color_palette.index(color1) + 1,
+    )
+
+    # custom_text = st.text_area(
+    #     "Custom Text",
+    #     value="""Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.""",
+    # )
+
+    custom_text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+
+    background_color = (
+        color_palette[background_color_idx - 1] if background_color_idx else "#ffffff"
+    )
+    text_color = color_palette[text_color_idx - 1] if text_color_idx else "#E2E2E2"
+    contrast_ratio = ColorContrastGenerator.get_contrast_ratio(
+        background_color, text_color
+    )
+    passed_standards = (
+        ", ".join(
+            i
+            for i, x in ColorContrastGenerator.AccessibilityLevel.items()
+            if x <= contrast_ratio
+        )
+        if any(
+            x <= contrast_ratio
+            for x in ColorContrastGenerator.AccessibilityLevel.values()
+        )
+        else "meets no standard"
+    )
+    missed_standards = (
+        ", ".join(
+            i
+            for i, x in ColorContrastGenerator.AccessibilityLevel.items()
+            if x >= contrast_ratio
+        )
+        if any(
+            x >= contrast_ratio
+            for x in ColorContrastGenerator.AccessibilityLevel.values()
+        )
+        else "passed all"
+    )
+
+    css_styles = f"""{{
+                    background-color: {background_color};
+                    border: 1px solid rgba(49, 51, 63, 0.2);
+                    border-radius: 0.5rem;
+                    padding: 3rem;
+                    line-height: 30px;
+                    color: {text_color};
+                    text-align: justify;
+                    .hex {{
+                        line-height: 10px;
+                        }}
+                    .highlight {{
+                        line-height: 25px;
+                        text-align: justify;
+                        word-wrap: break-word;
+                        # line-height: 20px;
+                        padding-right: 8rem;
+                        display: inline-block;
+                        }}
+            }}"""
+
+    with stylable_container(
+        key="custom_check",
+        css_styles=css_styles,
+    ):
+        st.markdown(
+            f"""                                                 
+                <span class="highlight" style="font-size: 25px;">**Contrast Ratio**</span>
+                
+                <span style="font-size: 50px;">{contrast_ratio}</span>
+                
+                <span class="hex">
+                Background: {background_color} 
+
+                Text: {text_color}
+                
+                Passes Standards: {passed_standards}
+                
+                Missed Standards: {missed_standards}
+                </span>
+                
+                
+                <span class="highlight" >
+                _____________________________________________________________________
+                
+                <h1>Example Header</h1>
+
+                {custom_text}
+                </span>
+                """,
+            unsafe_allow_html=True,
+        )
+# <span style="text-align: left;"></span>
+
 st.write("# COPY PALETTE")
-
-
-def reorder_as_ombre(palette):
-    # Convert hex colors to RGB
-    rgb_palette = [
-        tuple(int(color[i : i + 2], 16) for i in (1, 3, 5)) for color in palette
-    ]
-
-    # Sort colors by their brightness
-    sorted_palette = sorted(rgb_palette, key=lambda rgb: sum(rgb))
-
-    # Convert RGB back to hex
-    hex_palette = ["#%02x%02x%02x" % rgb for rgb in sorted_palette]
-
-    return hex_palette
 
 
 # color_palette = reorder_as_ombre(color_palette)
 
 st.image(gen_palette_img(color_palette))
 
+# st.image(gen_palette_img(reorder_as_ombre(color_palette)))
 
-st.image(gen_palette_img(reorder_as_ombre(color_palette)))
 
-color_palette
+# st.code(convert_rgb_palette(reorder_as_ombre(color_palette)), wrap_lines=True)
+
+st.code(reorder_as_ombre(color_palette))
+
+# color_palette
