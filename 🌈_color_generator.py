@@ -210,7 +210,9 @@ st.markdown(
 
 # inspiration palette
 
-inspo_expander = st.expander("**Inspiration Palettes**", expanded=False)
+inspo_expander = st.expander(
+    "**Inspiration Palettes**", expanded=False, icon=":material/auto_awesome:"
+)
 inspo_expander.markdown(hide_expander_border, unsafe_allow_html=True)
 
 with inspo_expander:
@@ -674,14 +676,14 @@ with custom_expander:
 
                 Text: {text_color}
                 
-                Passes Standards: {passed_standards}
+                **Passes Standards: {passed_standards}**
                 
-                Missed Standards: {missed_standards}
+                **Missed Standards: {missed_standards}**
                 </span>
                 
                 
                 <span class="highlight" >
-                _____________________________________________________________________
+                ________________________________________________________________________
                 
                 <h1>Example</h1>
 
