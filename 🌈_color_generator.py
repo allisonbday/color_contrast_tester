@@ -406,6 +406,8 @@ box_expander.markdown(hide_expander_border, unsafe_allow_html=True)
 if not results:
     line_expander.write("No combinations found")
     box_expander.write("No combinations found")
+    color1 = color_palette[0]
+    color2 = color_palette[1]
 
 for c in results:
 
@@ -563,7 +565,7 @@ with custom_expander:
     background_color = (
         color_palette[background_color_idx - 1] if background_color_idx else "#ffffff"
     )
-    text_color = color_palette[text_color_idx - 1] if text_color_idx else "#E2E2E2"
+    text_color = color_palette[text_color_idx - 1] if text_color_idx else "#000000"
     contrast_ratio = ColorContrastGenerator.get_contrast_ratio(
         background_color, text_color
     )
